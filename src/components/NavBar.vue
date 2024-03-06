@@ -1,6 +1,6 @@
 <template>
   <el-menu
-    :default-active="'1'.toString()"
+    :default-active="$route.path"
     class="el-menu-demo"
     mode="horizontal"
     :ellipsis="false"
@@ -14,24 +14,24 @@
       />
     </el-menu-item>
 
-    <el-menu-item index="1">
+    <el-menu-item index="/">
       介 绍
     </el-menu-item>
-    <el-menu-item index="2">
+    <el-menu-item index="/myProject">
       我的相亲对象们
     </el-menu-item>
-    <el-menu-item index="3">
+    <el-menu-item index="/shareMoments">
       经历分享圈
     </el-menu-item>
-    <el-menu-item index="4">
+    <el-menu-item index="/about">
       关于
     </el-menu-item>
     <div class="flex-grow" />
-    <el-menu-item v-if="!isLogin" index="5" class="menu-item--with-button">
-      <el-button type="primary" @click="plzLogin">登录</el-button>
-      <el-button type="success" @click="registerDialog = true">注册</el-button>
+    <el-menu-item v-if="!rlStore.isLogin" index="5" class="menu-item--with-button">
+      <el-button type="primary" @click="rlStore.plzLogin">登录</el-button>
+      <el-button type="success" @click="rlStore.registerDialog = true">注册</el-button>
     </el-menu-item>
-    <el-sub-menu v-if="isLogin" index="5">
+    <el-sub-menu v-if="rlStore.isLogin" index="5">
       <template #title>
         <el-tag>用户</el-tag>
         <el-avatar style="margin-left: 5px"
@@ -45,7 +45,7 @@
   </el-menu>
 
   <el-drawer
-    v-model="registerDialog"
+    v-model="rlStore.registerDialog"
     title="注 册"
     direction="ltr"
     class="demo-drawer"
@@ -66,16 +66,16 @@
         </el-form-item>
       </el-form>
       <div class="demo-drawer__footer">
-        <el-button @click="cancelRegisterForm">Cancel</el-button>
-        <el-button type="primary" :loading="loading" @click="submitRegisterForm(registerRuleFormRef)">{{
-            loading ? '提交中' : '提交'
+        <el-button @click="rlStore.cancelRegisterForm">Cancel</el-button>
+        <el-button type="primary" :loading="rlStore.navBarLoading" @click="rlStore.submitRegisterForm(registerRuleFormRef, registerForm)">{{
+            rlStore.navBarLoading ? '提交中' : '提交'
           }}
         </el-button>
       </div>
     </div>
   </el-drawer>
   <el-drawer
-    v-model="loginDialog"
+    v-model="rlStore.loginDialog"
     title="登 录"
     direction="ltr"
     class="demo-drawer"
@@ -90,9 +90,9 @@
         </el-form-item>
       </el-form>
       <div class="demo-drawer__footer">
-        <el-button @click="cancelLoginForm">Cancel</el-button>
-        <el-button type="primary" :loading="loading" @click="submitLoginForm(registerRuleFormRef)">{{
-            loading ? '登录中' : '登录'
+        <el-button @click="rlStore.cancelLoginForm">Cancel</el-button>
+        <el-button type="primary" :loading="rlStore.navBarLoading" @click="rlStore.submitLoginForm(registerRuleFormRef, loginForm)">{{
+            rlStore.navBarLoading ? '登录中' : '登录'
           }}
         </el-button>
       </div>
@@ -103,77 +103,31 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import { ElDrawer, ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { ElDrawer, type FormInstance, type FormRules } from 'element-plus'
 import type { RegisterInter } from '@/types/RegisterInter'
-import { bdRequest } from '@/config/bdRequest'
 import type { LoginInter } from '@/types/LoginInter'
-import { useBdTokenStore } from '@/types/bdToken'
 import router from '@/router'
+import { useBdTokenStore } from '@/stores/bdToken'
+import { useRegisterAndLoginStore } from '@/stores/RegisterAndLogin'
 
-let isLogin = ref(false)
 const bdTokenStore = useBdTokenStore()
-const loginDialog = ref(false)
+const rlStore = useRegisterAndLoginStore()
 
 onMounted(()=>{
-  if (bdTokenStore.getToken()) {
-    isLogin.value = true
+  if (bdTokenStore.token) {
+    rlStore.setLoginStatus(true)
   }
 })
 
-function plzLogin() {
-  loginDialog.value = true
-}
-
-function handleNavSelect(index:any) {
-  if (index == "1") {
+function handleNavSelect(path:any) {
+  if (path == "/" || path == "/myProject" || path == "/shareMoments" || path == "/about") {
+    router.push(path)
+  } else if (path == "5-2") {
     router.push("/")
-  } else if (index == "2") {
-    router.push("/myProject")
-    getCandidates()
-  }  else if (index == "3") {
-    router.push("/shareMoments")
-  } else if (index == "4") {
-    router.push("/about")
-  } else if (index == "5-2") {
-    router.push("/")
-    isLogin.value = false
-    bdTokenStore.setToken('')
+    rlStore.resetLoginStatus()
   }
 }
 
-async function getCandidates() {
-  await bdRequest.get('/api/getCandidateList', {
-      headers : {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "bd-token": bdTokenStore.getToken()
-      }
-    }
-  ).then((response) => {
-    if(response.data.code == 0) {
-      console.log(response.data.data)
-    } else {
-      ElMessage({
-        message: response.data.message,
-        type: 'warning',
-        duration: 1400,
-      })
-    }
-  }).catch((error) => {
-    ElMessage({
-      message: '服务器开小差~',
-      type: 'error',
-      duration: 1400,
-    })
-    console.log("获取候选人列表error: ", error)
-  });
-}
-
-
-const loading = ref(false)
-
-
-const registerDialog = ref(false)
-const registerRuleFormRef = ref<FormInstance>()
 const registerForm = reactive<RegisterInter>({
   account: '',
   username: '',
@@ -181,61 +135,12 @@ const registerForm = reactive<RegisterInter>({
   password2: ''
 })
 
-const submitRegisterForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  const checkPass = await formEl.validate((valid) => {
-    return valid;
-  })
-  if (!checkPass) {
-    ElMessage({
-      message: '请按照提示输入完整',
-      type: 'warning',
-      duration: 1400,
-    })
-    return;
-  }
+const loginForm = reactive<LoginInter>({
+  account: '',
+  password1: ''
+})
 
-  loading.value = true
-  await bdRequest.post('/api/register', {
-    newAccount: registerForm.account,
-    newPassword: registerForm.password1,
-    userName: registerForm.username
-  }, {
-    headers : {
-      "Content-Type": "application/x-www-form-urlencoded"
-    }
-  }
-  ).then((response) => {
-    if(response.data.code == 0) {
-      ElMessage({
-        message: '注册成功',
-        type: 'success',
-        duration: 1400,
-      })
-      cancelRegisterForm();
-    } else {
-      ElMessage({
-        message: response.data.message,
-        type: 'warning',
-        duration: 1400,
-      })
-    }
-  }).catch((error) => {
-    ElMessage({
-      message: '服务器开小差~',
-      type: 'error',
-      duration: 1400,
-    })
-    console.log("注册失败error: ", error)
-  });
-  loading.value = false
-}
-
-
-const cancelRegisterForm = () => {
-  loading.value = false
-  registerDialog.value = false
-}
+const registerRuleFormRef = ref<FormInstance>()
 
 const registerFormRule = reactive<FormRules<RegisterInter>>({
   account: [
@@ -255,72 +160,6 @@ const registerFormRule = reactive<FormRules<RegisterInter>>({
     { min: 6, max: 20, message: '长度限制为6-20', trigger: 'blur' },
   ],
 })
-
-
-const loginForm = reactive<LoginInter>({
-  account: '',
-  password1: ''
-})
-
-const submitLoginForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  const checkPass = await formEl.validate((valid) => {
-    return valid;
-  })
-  if (!checkPass) {
-    ElMessage({
-      message: '请按照提示输入完整',
-      type: 'warning',
-      duration: 1400,
-    })
-    return;
-  }
-
-  loading.value = true
-  await bdRequest.post('/api/login', {
-      account: loginForm.account,
-      password: loginForm.password1,
-    }, {
-      headers : {
-        "Content-Type": "application/x-www-form-urlencoded"
-      }
-    }
-  ).then((response) => {
-    if(response.data.code == 0) {
-      ElMessage({
-        message: '登录成功',
-        type: 'success',
-        duration: 1400,
-      })
-      // 修改登录状态
-      isLogin.value = true
-      // 记录token
-      bdTokenStore.setToken(response.data.data)
-      cancelLoginForm();
-    } else {
-      ElMessage({
-        message: response.data.message,
-        type: 'warning',
-        duration: 1400,
-      })
-    }
-  }).catch((error) => {
-    ElMessage({
-      message: '服务器开小差~',
-      type: 'error',
-      duration: 1400,
-    })
-    console.log("登录失败error: ", error)
-  });
-  loading.value = false
-}
-
-
-const cancelLoginForm = () => {
-  loading.value = false
-  loginDialog.value = false
-}
-
 </script>
 
 <style scoped>
