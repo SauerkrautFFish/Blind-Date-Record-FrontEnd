@@ -11,7 +11,8 @@ const router = createRouter({
     {
       path: '/myProject',
       name: 'myBlindDateProject',
-      component: () => import("@/views/MyBlindDateProject.vue")
+      component: () => import("@/views/MyBlindDateProject.vue"),
+
     },
     {
       path: '/shareMoments',
@@ -22,6 +23,12 @@ const router = createRouter({
       path: '/about',
       name: 'aboutUs',
       component: () => import("@/views/AboutUs.vue")
+    },
+    {
+      path: '/myProject/candidateDetail/:candidateId',
+      name: 'detailPage',
+      component: () => import("@/views/CandidateDetail.vue"),
+      props: true
     },
   ]
 })

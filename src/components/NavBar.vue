@@ -123,7 +123,6 @@ function handleNavSelect(path:any) {
   if (path == "/" || path == "/myProject" || path == "/shareMoments" || path == "/about") {
     router.push(path)
   } else if (path == "5-2") {
-    router.push("/")
     rlStore.resetLoginStatus()
   }
 }

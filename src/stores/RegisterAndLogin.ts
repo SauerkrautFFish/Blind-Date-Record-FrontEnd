@@ -3,6 +3,7 @@ import { useBdTokenStore } from '@/stores/bdToken'
 import type { FormInstance } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { bdRequest } from '@/config/bdRequest'
+import router from '@/router'
 
 export const useRegisterAndLoginStore = defineStore('registerAndLogin', {
 
@@ -39,6 +40,7 @@ export const useRegisterAndLoginStore = defineStore('registerAndLogin', {
       this.setLoginStatus(false)
       const bdTokenStore = useBdTokenStore()
       bdTokenStore.setToken('')
+      router.push("/")
     },
 
     cancelRegisterForm() {
