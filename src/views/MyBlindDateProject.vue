@@ -68,7 +68,7 @@ const filterCandidateList = computed(() =>
   )
 )
 const handleEnter = (candidateId:number) => {
-  router.push(`/myProject/candidateDetail/${candidateId}`)
+  router.push(`/myProject/candidateRecord/${candidateId}`)
 }
 const handleEdit = (candidateId:number) => {
 

@@ -25,9 +25,9 @@ const router = createRouter({
       component: () => import("@/views/AboutUs.vue")
     },
     {
-      path: '/myProject/candidateDetail/:candidateId',
+      path: '/myProject/candidateRecord/:candidateId',
       name: 'detailPage',
-      component: () => import("@/views/CandidateDetail.vue"),
+      component: () => import("@/views/CandidateRecord.vue"),
       props: true
     },
   ]

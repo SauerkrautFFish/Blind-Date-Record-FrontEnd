@@ -3,7 +3,7 @@ import { bdRequest } from '@/config/bdRequest'
 import { ElMessage } from 'element-plus'
 import { useBdTokenStore } from '@/stores/bdToken'
 import { useRegisterAndLoginStore } from '@/stores/RegisterAndLogin'
-import type { CandidateInter } from '@/types/CandidateInter'
+import type { CandidateInter, CandidateRecordInter } from '@/types/CandidateInter'
 
 export const useCandidateListStore = defineStore('candidateList', {
 
@@ -11,6 +11,7 @@ export const useCandidateListStore = defineStore('candidateList', {
     projectLoading: false, // 项目loading状态
     addCandidateDialog: false, // 添加候选人dialog
     candidateList: [] as CandidateInter[], // 候选人列表
+    candidateRecords: {} as {[key:number] : CandidateRecordInter}
   }),
 
   actions: {
@@ -25,6 +26,24 @@ export const useCandidateListStore = defineStore('candidateList', {
 
     setCandidateList(candidateList:any) {
       this.candidateList = candidateList;
+    },
+
+    setCandidateRecordsByOne(record:CandidateRecordInter) {
+      this.candidateRecords[record.candidateId] = record
+    },
+
+    getCandidateRecordByCandidateId(candidateId:any) {
+      return this.candidateRecords[candidateId] || {}
+    },
+
+    getCandidateNameById(id:any):string {
+      for(let i = 0; i < this.candidateList.length; i++) {
+        if(this.candidateList[i].id == id) {
+          return this.candidateList[i].name
+        }
+      }
+
+      return ""
     },
 
     async getCandidatesApi() {
@@ -100,7 +119,42 @@ export const useCandidateListStore = defineStore('candidateList', {
       });
 
       this.setProjectLoading(false)
-    }
+    },
+
+    async getCandidateRecordApi(candidateId:any) {
+      const bdTokenStore = useBdTokenStore()
+      await bdRequest.get(`/api/getCandidateBlindRecord?candidateId=${candidateId}`, {
+          headers : {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "bd-token": bdTokenStore.token
+          }
+        }
+      ).then((response) => {
+        if(response.data.code == 0) {
+          const candidateRecord = response.data.data
+          this.setCandidateRecordsByOne(candidateRecord)
+        } else {
+          ElMessage({
+            message: response.data.message,
+            type: 'warning',
+            duration: 1400,
+          })
+        }
+      }).catch((error) => {
+        if(error.response.status == 401) {
+          const rlStore = useRegisterAndLoginStore()
+          rlStore.plzLogin()
+          return;
+        }
+
+        ElMessage({
+          message: '服务器开小差~',
+          type: 'error',
+          duration: 1400,
+        })
+        console.log("获取候选人详情error: ", error)
+      });
+    },
   },
 
 });

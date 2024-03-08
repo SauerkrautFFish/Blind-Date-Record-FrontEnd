@@ -4,6 +4,16 @@ export interface CandidateInter {
   createTime:Date
 }
 
-export interface CandidateDetailInter {
+export interface CandidateRecordInter {
+  id: number,
+  candidateId: number,
+  userRecord: Array<OneRecordInter>,
+  candidateRecord: Array<OneRecordInter>,
+}
 
+export interface OneRecordInter {
+  date: string,
+  totalCnt: number,
+  successCnt: number,
+  explanation: string
 }
