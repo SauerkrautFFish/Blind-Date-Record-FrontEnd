@@ -5,13 +5,14 @@ import { useBdTokenStore } from '@/stores/bdToken'
 import { useRegisterAndLoginStore } from '@/stores/RegisterAndLogin'
 import type { CandidateInter, CandidateRecordInter } from '@/types/CandidateInter'
 
-export const useCandidateListStore = defineStore('candidateList', {
+export const useCandidateStore = defineStore('candidate', {
 
   state: () => ({
     projectLoading: false, // 项目loading状态
     addCandidateDialog: false, // 添加候选人dialog
     candidateList: [] as CandidateInter[], // 候选人列表
-    candidateRecords: {} as {[key:number] : CandidateRecordInter}
+    candidateRecords: {} as {[key:number] : CandidateRecordInter},
+    addCandidateRecordDialog: false, // 添加候选人dialog
   }),
 
   actions: {
@@ -22,6 +23,10 @@ export const useCandidateListStore = defineStore('candidateList', {
 
     setAddCandidateDialog(flag:boolean) {
       this.addCandidateDialog = flag
+    },
+
+    setAddCandidateRecordDialog(flag:boolean) {
+      this.addCandidateRecordDialog = flag
     },
 
     setCandidateList(candidateList:any) {
@@ -81,7 +86,7 @@ export const useCandidateListStore = defineStore('candidateList', {
       });
     },
 
-    async addCandidate(addCandidateForm:any) {
+    async addCandidateApi(addCandidateForm:any) {
       this.setProjectLoading(true)
 
       const bdTokenStore = useBdTokenStore()
@@ -154,6 +159,62 @@ export const useCandidateListStore = defineStore('candidateList', {
         })
         console.log("获取候选人详情error: ", error)
       });
+    },
+
+    setCandidateRecord(candidateRecord:any, candidateId:any) {
+      const record = this.getCandidateRecordByCandidateId(candidateId)
+      record.candidateRecord.push({date: candidateRecord.date, totalCnt: candidateRecord.totalCnt,
+        successCnt: candidateRecord.successCnt, explanation: candidateRecord.explanation})
+
+      this.setCandidateRecordApi(record)
+
+    },
+
+    setUserRecord(userRecord:any, candidateId:any) {
+      const record = this.getCandidateRecordByCandidateId(candidateId)
+      record.userRecord.push({date: userRecord.date, totalCnt: userRecord.totalCnt,
+        successCnt: userRecord.successCnt, explanation: userRecord.explanation})
+      this.setCandidateRecordApi(record)
+    },
+
+    async setCandidateRecordApi(record:any) {
+      this.setProjectLoading(true)
+
+      const bdTokenStore = useBdTokenStore()
+      const {id, candidateId, userRecord, candidateRecord} = record
+      await bdRequest.post('/api/setCandidateBlindRecord', {
+          id, candidateId, userRecord, candidateRecord
+        }, {
+          headers : {
+            "Content-Type": "application/json",
+            "bd-token": bdTokenStore.token
+          }
+        }
+      ).then((response) => {
+        if(response.data.code == 0) {
+          ElMessage({
+            message: '添加成功',
+            type: 'success',
+            duration: 1400,
+          })
+          this.setAddCandidateRecordDialog(false)
+        } else {
+          ElMessage({
+            message: response.data.message,
+            type: 'warning',
+            duration: 1400,
+          })
+        }
+      }).catch((error) => {
+        ElMessage({
+          message: '服务器开小差~',
+          type: 'error',
+          duration: 1400,
+        })
+        console.log("添加候选人记录error: ", error)
+      });
+
+      this.setProjectLoading(false)
     },
   },
 

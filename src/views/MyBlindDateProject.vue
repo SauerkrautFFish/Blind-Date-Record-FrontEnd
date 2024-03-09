@@ -2,9 +2,9 @@
 
   <el-tabs type="card" v-model="defaultTab">
     <el-tab-pane label="候选人列表" name="candidateTab">
-      <el-button type="primary" round @click="candidateListStore.addCandidateDialog = true">添 加</el-button>
+      <el-button type="primary" round @click="candidateStore.addCandidateDialog = true">添 加</el-button>
       <el-divider />
-      <el-dialog v-model="candidateListStore.addCandidateDialog" title="添加候选人" width="500">
+      <el-dialog v-model="candidateStore.addCandidateDialog" title="添加候选人" width="500">
         <el-form :model="addCandidateForm">
           <el-form-item label="名 字">
             <el-input v-model="addCandidateForm.name" autocomplete="off" />
@@ -12,10 +12,10 @@
         </el-form>
         <template #footer>
           <div class="dialog-footer">
-            <el-button @click="candidateListStore.addCandidateDialog = false">取消</el-button>
-            <el-button type="primary" :loading="candidateListStore.projectLoading" @click="candidateListStore.addCandidate(addCandidateForm)">
+            <el-button @click="candidateStore.addCandidateDialog = false">取消</el-button>
+            <el-button type="primary" :loading="candidateStore.projectLoading" @click="candidateStore.addCandidateApi(addCandidateForm)">
               {{
-                candidateListStore.projectLoading ? '提交中' : '确认'
+                candidateStore.projectLoading ? '提交中' : '确认'
               }}
             </el-button>
           </div>
@@ -44,24 +44,24 @@
 </template>
 
 <script setup lang="ts">
-import { useCandidateListStore } from '@/stores/candidateList'
+import { useCandidateStore } from '@/stores/candidateList'
 import { computed, onMounted, reactive, ref } from 'vue'
 import router from '@/router'
 
-const candidateListStore = useCandidateListStore()
+const candidateStore = useCandidateStore()
 
 const addCandidateForm = reactive({
   name: '',
 })
 
 onMounted(() => {
-  candidateListStore.getCandidatesApi()
+  candidateStore.getCandidatesApi()
 })
 
 const candidateSearch = ref('')
 const defaultTab = ref('candidateTab')
 const filterCandidateList = computed(() =>
-  candidateListStore.candidateList.filter(
+  candidateStore.candidateList.filter(
     (data) =>
       !candidateSearch.value ||
       data.name.toLowerCase().includes(candidateSearch.value.toLowerCase())
