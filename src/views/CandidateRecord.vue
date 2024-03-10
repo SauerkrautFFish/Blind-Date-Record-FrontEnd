@@ -5,9 +5,7 @@
     </template>
 
     <div id="main-chart" style="width: 100%; height: 500px"></div>
-    <el-button type="primary" round @click="candidateStore.addCandidateRecordDialog = true">添 加</el-button>
-    <el-divider />
-    <el-dialog v-model="candidateStore.addCandidateRecordDialog" title="添加记录" width="500">
+    <el-dialog v-model="candidateStore.addCandidateRecordDialog" @close="resetCandidateRecordForm" title="添加记录" width="500">
       <el-form :model="addCandidateRecordForm">
         <el-form-item label="日 期">
           <el-date-picker
@@ -17,7 +15,7 @@
             size="large"
           />
         </el-form-item>
-        <el-form-item label="总预约次数">
+        <el-form-item label="尝试约会次数">
           <el-input-number
             v-model="addCandidateRecordForm.totalCnt"
             :min="1"
@@ -47,7 +45,7 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="candidateStore.addCandidateRecordDialog = false">取消</el-button>
+          <el-button @click="resetCandidateRecordForm">取消</el-button>
           <el-button type="primary" :loading="candidateStore.projectLoading" @click="candidateStore.setUserRecord(addCandidateRecordForm, candidateId)">
             {{
               candidateStore.projectLoading ? '提交中' : '确认'
@@ -56,19 +54,47 @@
         </div>
       </template>
     </el-dialog>
+    <div style="width: 45%; height: auto; background-color: red; position:absolute;">
+      <el-button class="mt-4" type="primary" style="width: 100%" @click="candidateStore.setAddCandidateRecordDialog(true)">添加记录</el-button>
+      <el-table :data="candidateStore.getCandidateRecordByCandidateId(candidateId).userRecord" style="width: 100%">
+        <el-table-column fixed prop="date" sortable label="日 期"/>
+        <el-table-column prop="totalCnt" label="尝试约会次数"/>
+        <el-table-column prop="successCnt" label="成功次数"/>
+        <el-table-column prop="explanation" label="说 明"/>
+        <el-table-column fixed="right" label="操 作">
+          <template #default="scope">
+            <el-button link type="primary" size="small" @click="modifyCandidateRecord(scope)" >
+              edit
+            </el-button>
+            <el-button link type="danger" size="small" @click.prevent="deleteRow(scope.$index)">
+              Remove
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
 
+    </div>
+    <div style="width: 45%; height: auto; background-color: blue; margin-left:5%;">
+
+    </div>
   </el-page-header>
 
 </template>
 
 <script setup lang="ts">
 import { ArrowLeft } from '@element-plus/icons-vue'
-import { onMounted, reactive } from 'vue'
+import { onMounted, reactive, ref, toRefs, watch } from 'vue'
 import { useCandidateStore } from '@/stores/candidateList'
 import router from '@/router'
 import * as echarts from 'echarts';
+import { storeToRefs } from 'pinia'
+
+function deleteRow(val:any) {
+
+}
 
 const addCandidateRecordForm = reactive({
+  recordIndex: -1,
   date: '',
   totalCnt: 0,
   successCnt: 0,
@@ -76,13 +102,47 @@ const addCandidateRecordForm = reactive({
 })
 
 const {candidateId} = defineProps(['candidateId'])
-console.log("candidateId ts=", candidateId)
 const candidateStore = useCandidateStore()
 const candidateName = candidateStore.getCandidateNameById(candidateId)
+const {candidateRecords} = storeToRefs(candidateStore)
+function modifyCandidateRecord(scope:any) {
+  addCandidateRecordForm.recordIndex = scope.$index
+  addCandidateRecordForm.date = scope.row.date
+  addCandidateRecordForm.totalCnt = scope.row.totalCnt
+  addCandidateRecordForm.successCnt = scope.row.successCnt
+  addCandidateRecordForm.explanation = scope.row.explanation
+
+  candidateStore.setAddCandidateRecordDialog(true)
+}
+
+function resetCandidateRecordForm() {
+  candidateStore.setAddCandidateRecordDialog(false)
+  addCandidateRecordForm.recordIndex = -1
+  addCandidateRecordForm.date = ''
+  addCandidateRecordForm.totalCnt = 0
+  addCandidateRecordForm.successCnt = 0
+  addCandidateRecordForm.explanation = ''
+}
+
+
+watch(() => candidateRecords, (oldVal, newVal) => {
+
+  const a = candidateRecords.value[candidateId].userRecord
+  for(let i = 0; i < a.length; i++) {
+    console.log(a[i].totalCnt)
+  }
+  // 获取两个record的date去重+排序
+
+  // 把数据往里面一个个塞进去 如果为空则塞前面哪个值
+
+
+}, {deep: true})
+
+let myChart = ref<echarts.ECharts | null>();
 
 onMounted(() => {
   candidateStore.getCandidateRecordApi(candidateId)
-  const myChart = echarts.init(document.getElementById('main-chart'));
+  myChart.value = echarts.init(document.getElementById('main-chart'));
 // 绘制图表
   const option = {
     // 通过这个color修改两条线的颜色
@@ -142,14 +202,14 @@ onMounted(() => {
     },
     series: [
       {
-        name: "新增粉丝",
+        name: "你",
         type: "line",
         // true 可以让我们的折线显示带有弧度
         smooth: true,
-        data: [123, 456]
+        data: [1,2]
       },
       {
-        name: "新增游客",
+        name: "他/她",
         type: "line",
         smooth: true,
         data: [132, 1222],
@@ -164,10 +224,10 @@ onMounted(() => {
     ]
   };
 
-  myChart.setOption(option)
+  myChart.value.setOption(option)
 
   window.addEventListener("resize", function() {
-    myChart.resize();
+    myChart.value?.resize();
   });
 })
 

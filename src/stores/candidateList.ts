@@ -4,6 +4,7 @@ import { ElMessage } from 'element-plus'
 import { useBdTokenStore } from '@/stores/bdToken'
 import { useRegisterAndLoginStore } from '@/stores/RegisterAndLogin'
 import type { CandidateInter, CandidateRecordInter } from '@/types/CandidateInter'
+import { useUtilsStore } from '@/stores/commonUtils'
 
 export const useCandidateStore = defineStore('candidate', {
 
@@ -162,6 +163,9 @@ export const useCandidateStore = defineStore('candidate', {
     },
 
     setCandidateRecord(candidateRecord:any, candidateId:any) {
+      const utils = useUtilsStore()
+      candidateRecord.date = utils.getFormatTime(candidateRecord.date)
+
       const record = this.getCandidateRecordByCandidateId(candidateId)
       record.candidateRecord.push({date: candidateRecord.date, totalCnt: candidateRecord.totalCnt,
         successCnt: candidateRecord.successCnt, explanation: candidateRecord.explanation})
@@ -171,9 +175,16 @@ export const useCandidateStore = defineStore('candidate', {
     },
 
     setUserRecord(userRecord:any, candidateId:any) {
+      const utils = useUtilsStore()
+      userRecord.date = utils.getFormatTime(userRecord.date)
+
       const record = this.getCandidateRecordByCandidateId(candidateId)
-      record.userRecord.push({date: userRecord.date, totalCnt: userRecord.totalCnt,
-        successCnt: userRecord.successCnt, explanation: userRecord.explanation})
+      if(userRecord.recordIndex == -1)
+        record.userRecord.push({date: userRecord.date, totalCnt: userRecord.totalCnt,
+          successCnt: userRecord.successCnt, explanation: userRecord.explanation})
+      else
+        record.userRecord[userRecord.recordIndex] = userRecord
+
       this.setCandidateRecordApi(record)
     },
 
