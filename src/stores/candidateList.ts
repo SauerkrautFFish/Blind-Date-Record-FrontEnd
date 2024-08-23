@@ -164,7 +164,9 @@ export const useCandidateStore = defineStore('candidate', {
 
     setCandidateRecord(candidateRecord:any, candidateId:any) {
       const utils = useUtilsStore()
-      candidateRecord.date = utils.getFormatTime(candidateRecord.date)
+
+      const candidateRecordDate = new Date(candidateRecord.date)
+      candidateRecord.date = utils.getFormatTime(candidateRecordDate)
 
       const record = this.getCandidateRecordByCandidateId(candidateId)
       record.candidateRecord.push({date: candidateRecord.date, totalCnt: candidateRecord.totalCnt,
@@ -174,9 +176,21 @@ export const useCandidateStore = defineStore('candidate', {
 
     },
 
+    setRecord(record:any, candidateId:any) {
+      if (record.isUserRecord) {
+        this.setUserRecord(record, candidateId)
+      } else {
+        this.setCandidateRecord(record, candidateId)
+      }
+    },
+
     setUserRecord(userRecord:any, candidateId:any) {
       const utils = useUtilsStore()
-      userRecord.date = utils.getFormatTime(userRecord.date)
+
+      const userRecordDate = new Date(userRecord.date)
+      userRecord.date = utils.getFormatTime(userRecordDate)
+
+      // TODO 判断日期参数等
 
       const record = this.getCandidateRecordByCandidateId(candidateId)
       if(userRecord.recordIndex == -1)
@@ -184,6 +198,17 @@ export const useCandidateStore = defineStore('candidate', {
           successCnt: userRecord.successCnt, explanation: userRecord.explanation})
       else
         record.userRecord[userRecord.recordIndex] = userRecord
+
+      this.setCandidateRecordApi(record)
+    },
+
+    deleteOneRecord(candidateId:any, index:any, isUserRecord:any) {
+      const record = this.getCandidateRecordByCandidateId(candidateId)
+      if (isUserRecord) {
+        record.userRecord.splice(index, 1)
+      } else {
+        record.candidateRecord.splice(index, 1)
+      }
 
       this.setCandidateRecordApi(record)
     },
@@ -204,11 +229,12 @@ export const useCandidateStore = defineStore('candidate', {
       ).then((response) => {
         if(response.data.code == 0) {
           ElMessage({
-            message: '添加成功',
+            message: '操作成功',
             type: 'success',
             duration: 1400,
           })
           this.setAddCandidateRecordDialog(false)
+          this.getCandidateRecordApi(candidateId)
         } else {
           ElMessage({
             message: response.data.message,

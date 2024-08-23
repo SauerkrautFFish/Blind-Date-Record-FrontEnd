@@ -11,7 +11,7 @@
           <el-date-picker
             v-model="addCandidateRecordForm.date"
             type="date"
-            placeholder="Pick a day"
+            placeholder="选择日期"
             size="large"
           />
         </el-form-item>
@@ -46,7 +46,7 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="resetCandidateRecordForm">取消</el-button>
-          <el-button type="primary" :loading="candidateStore.projectLoading" @click="candidateStore.setUserRecord(addCandidateRecordForm, candidateId)">
+          <el-button type="primary" :loading="candidateStore.projectLoading" @click="candidateStore.setRecord(addCandidateRecordForm, candidateId)">
             {{
               candidateStore.projectLoading ? '提交中' : '确认'
             }}
@@ -55,7 +55,7 @@
       </template>
     </el-dialog>
     <div style="width: 45%; height: auto; background-color: red; position:absolute;">
-      <el-button class="mt-4" type="primary" style="width: 100%" @click="candidateStore.setAddCandidateRecordDialog(true)">添加记录</el-button>
+      <el-button class="mt-4" type="primary" style="width: 100%" @click="identifyUserAndCandidate(true)">添加记录</el-button>
       <el-table :data="candidateStore.getCandidateRecordByCandidateId(candidateId).userRecord" style="width: 100%">
         <el-table-column fixed prop="date" sortable label="日 期"/>
         <el-table-column prop="totalCnt" label="尝试约会次数"/>
@@ -63,19 +63,35 @@
         <el-table-column prop="explanation" label="说 明"/>
         <el-table-column fixed="right" label="操 作">
           <template #default="scope">
-            <el-button link type="primary" size="small" @click="modifyCandidateRecord(scope)" >
-              edit
+            <el-button link type="primary" size="small" @click="modifyCandidateRecord(scope, true)" >
+              修改
             </el-button>
-            <el-button link type="danger" size="small" @click.prevent="deleteRow(scope.$index)">
-              Remove
+            <el-button link type="danger" size="small" @click="candidateStore.deleteOneRecord(candidateId, scope.$index, true)">
+              删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
 
     </div>
-    <div style="width: 45%; height: auto; background-color: blue; margin-left:5%;">
-
+    <div style="width: 45%; height: auto; background-color: blue; margin-left:50%;">
+      <el-button class="mt-4" type="primary" style="width: 100%" @click="identifyUserAndCandidate(false)">添加记录</el-button>
+      <el-table :data="candidateStore.getCandidateRecordByCandidateId(candidateId).candidateRecord" style="width: 100%">
+        <el-table-column fixed prop="date" sortable label="日 期"/>
+        <el-table-column prop="totalCnt" label="尝试约会次数"/>
+        <el-table-column prop="successCnt" label="成功次数"/>
+        <el-table-column prop="explanation" label="说 明"/>
+        <el-table-column fixed="right" label="操 作">
+          <template #default="scope">
+            <el-button link type="primary" size="small" @click="modifyCandidateRecord(scope, false)" >
+              修改
+            </el-button>
+            <el-button link type="danger" size="small" @click="candidateStore.deleteOneRecord(candidateId, scope.$index, false)">
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
     </div>
   </el-page-header>
 
@@ -98,20 +114,26 @@ const addCandidateRecordForm = reactive({
   date: '',
   totalCnt: 0,
   successCnt: 0,
-  explanation: ''
+  explanation: '',
+  // 判断下是否是用户记录
+  isUserRecord: false
 })
 
 const {candidateId} = defineProps(['candidateId'])
 const candidateStore = useCandidateStore()
 const candidateName = candidateStore.getCandidateNameById(candidateId)
 const {candidateRecords} = storeToRefs(candidateStore)
-function modifyCandidateRecord(scope:any) {
+function modifyCandidateRecord(scope:any, isUserRecord:any) {
   addCandidateRecordForm.recordIndex = scope.$index
   addCandidateRecordForm.date = scope.row.date
   addCandidateRecordForm.totalCnt = scope.row.totalCnt
   addCandidateRecordForm.successCnt = scope.row.successCnt
   addCandidateRecordForm.explanation = scope.row.explanation
+  identifyUserAndCandidate(isUserRecord)
+}
 
+function identifyUserAndCandidate(isUserRecord:any) {
+  addCandidateRecordForm.isUserRecord = isUserRecord
   candidateStore.setAddCandidateRecordDialog(true)
 }
 
