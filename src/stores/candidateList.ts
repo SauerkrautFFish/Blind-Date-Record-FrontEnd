@@ -42,15 +42,16 @@ export const useCandidateStore = defineStore('candidate', {
       return this.candidateRecords[candidateId] || {}
     },
 
-    getCandidateNameById(id:any):string {
-      for(let i = 0; i < this.candidateList.length; i++) {
-        if(this.candidateList[i].id == id) {
-          return this.candidateList[i].name
-        }
-      }
-
-      return ""
-    },
+    // getCandidateNameById(id:any):string {
+    //   console.log(this.candidateList.length)
+    //   for(let i = 0; i < this.candidateList.length; i++) {
+    //     if(this.candidateList[i].id == id) {
+    //       return this.candidateList[i].name
+    //     }
+    //   }
+    //
+    //   return ""
+    // },
 
     async getCandidatesApi() {
       const bdTokenStore = useBdTokenStore()

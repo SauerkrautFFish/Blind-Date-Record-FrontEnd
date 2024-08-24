@@ -55,7 +55,7 @@
       </template>
     </el-dialog>
     <div style="width: 45%; height: auto; background-color: red; position:absolute;">
-      <el-button class="mt-4" type="primary" style="width: 100%" @click="identifyUserAndCandidate(true)">添加记录</el-button>
+      <el-button class="mt-4" type="primary" style="width: 100%" @click="identifyUserAndCandidate(true)">添加自己的记录</el-button>
       <el-table :data="candidateStore.getCandidateRecordByCandidateId(candidateId).userRecord" style="width: 100%">
         <el-table-column fixed prop="date" sortable label="日 期"/>
         <el-table-column prop="totalCnt" label="尝试约会次数"/>
@@ -75,7 +75,7 @@
 
     </div>
     <div style="width: 45%; height: auto; background-color: blue; margin-left:50%;">
-      <el-button class="mt-4" type="primary" style="width: 100%" @click="identifyUserAndCandidate(false)">添加记录</el-button>
+      <el-button class="mt-4" type="primary" style="width: 100%" @click="identifyUserAndCandidate(false)">添加相亲对象的记录</el-button>
       <el-table :data="candidateStore.getCandidateRecordByCandidateId(candidateId).candidateRecord" style="width: 100%">
         <el-table-column fixed prop="date" sortable label="日 期"/>
         <el-table-column prop="totalCnt" label="尝试约会次数"/>
@@ -99,15 +99,11 @@
 
 <script setup lang="ts">
 import { ArrowLeft } from '@element-plus/icons-vue'
-import { onMounted, reactive, ref, toRefs, watch } from 'vue'
+import { markRaw, onMounted, reactive, ref, toRefs, watch } from 'vue'
 import { useCandidateStore } from '@/stores/candidateList'
 import router from '@/router'
 import * as echarts from 'echarts';
 import { storeToRefs } from 'pinia'
-
-function deleteRow(val:any) {
-
-}
 
 const addCandidateRecordForm = reactive({
   recordIndex: -1,
@@ -121,8 +117,9 @@ const addCandidateRecordForm = reactive({
 
 const {candidateId} = defineProps(['candidateId'])
 const candidateStore = useCandidateStore()
-const candidateName = candidateStore.getCandidateNameById(candidateId)
 const {candidateRecords} = storeToRefs(candidateStore)
+const candidateName = ref('')
+
 function modifyCandidateRecord(scope:any, isUserRecord:any) {
   addCandidateRecordForm.recordIndex = scope.$index
   addCandidateRecordForm.date = scope.row.date
@@ -146,40 +143,48 @@ function resetCandidateRecordForm() {
   addCandidateRecordForm.explanation = ''
 }
 
-
-watch(() => candidateRecords, (oldVal, newVal) => {
-
-  const a = candidateRecords.value[candidateId].userRecord
-  for(let i = 0; i < a.length; i++) {
-    console.log(a[i].totalCnt)
-  }
-  // 获取两个record的date去重+排序
-
-  // 把数据往里面一个个塞进去 如果为空则塞前面哪个值
-
-
-}, {deep: true})
-
 let myChart = ref<echarts.ECharts | null>();
 
 onMounted(() => {
   candidateStore.getCandidateRecordApi(candidateId)
-  myChart.value = echarts.init(document.getElementById('main-chart'));
-// 绘制图表
+  // markRaw避免了很多vue3响应式导致echart图表奇怪的问题 牛 虽然不知道原理
+  myChart.value = markRaw(echarts.init(document.getElementById('main-chart')));
+  window.addEventListener('resize', () => {
+    myChart.value?.resize();
+  })
+
+
+})
+
+
+watch(() => candidateRecords, (oldVal, newVal) => {
+  const data = candidateRecords.value[candidateId]
+
+  candidateName.value = data.candidateName
+
+  const dateXAxisData = data.dateXAxisData
+  const userYAxisData = data.userYAxisData
+  const candidateYAxisData = data.candidateYAxisData
+
   const option = {
     // 通过这个color修改两条线的颜色
     color: ["#00f2f1", "#ed3f35"],
     tooltip: {
-      trigger: "axis"
+      trigger: 'item',
+      formatter: function (params:any) {
+        let xAxisLabel = params.name;
+        let yAxisValue = params.data;
+        return `X: ${xAxisLabel}<br/>Y: ${yAxisValue}%`;
+      }
     },
     legend: {
       // 如果series 对象有name 值，则 legend可以不用写data
+      //selectedMode: false, // 点击标签不会导致折线图消失 (事实上 这里是规避了vue3绑定echart 导致点击标签报错的问题 我不知道怎么修复 所以就不让用户可以点击标签了)
       // 修改图例组件 文字颜色
       textStyle: {
         color: "#4c9bfd"
       },
-      // 这个10% 必须加引号
-      right: "10%"
+
     },
     grid: {
       top: "20%",
@@ -194,12 +199,12 @@ onMounted(() => {
     xAxis: {
       type: "category",
       boundaryGap: false,
-      data: ['1', '2'],
+      data: dateXAxisData,
       axisTick: {
         show: false // 去除刻度线
       },
       axisLabel: {
-        color: "#4c9bfd" // 文本颜色
+        color: "#000000" // 文本颜色
       },
       axisLine: {
         show: false // 去除轴线
@@ -211,7 +216,7 @@ onMounted(() => {
         show: false // 去除刻度线
       },
       axisLabel: {
-        color: "#4c9bfd" // 文本颜色
+        color: "#000000" // 文本颜色
       },
       axisLine: {
         show: false // 去除轴线
@@ -228,30 +233,43 @@ onMounted(() => {
         type: "line",
         // true 可以让我们的折线显示带有弧度
         smooth: true,
-        data: [1,2]
-      },
-      {
-        name: "他/她",
-        type: "line",
-        smooth: true,
-        data: [132, 1222],
+        data: userYAxisData,
         label: {
           show: true, // 显示数据标签
           position: 'top', // 数据标签位置，可以是 'top', 'bottom', 'inside', 'insideTop', 'insideBottom', 'insideLeft', 'insideRight', 'insideTopLeft', 'insideTopRight', 'insideBottomLeft', 'insideBottomRight'
-          color: '#FF5733', // 数据标签文本颜色
+          color: '#000000', // 数据标签文本颜色
           fontSize: 12, // 数据标签文本大小
-
+          formatter: function (params:any) {
+            // 自定义显示内容
+            let yAxisValue = params.value; // y 轴值
+            return `${yAxisValue}%`;
+          }
+        },
+      },
+      {
+        name: "相亲对象",
+        type: "line",
+        smooth: true,
+        data: candidateYAxisData,
+        label: {
+          show: true, // 显示数据标签
+          position: 'top', // 数据标签位置，可以是 'top', 'bottom', 'inside', 'insideTop', 'insideBottom', 'insideLeft', 'insideRight', 'insideTopLeft', 'insideTopRight', 'insideBottomLeft', 'insideBottomRight'
+          color: '#000000', // 数据标签文本颜色
+          fontSize: 12, // 数据标签文本大小
+          formatter: function (params:any) {
+            // 自定义显示内容
+            let yAxisValue = params.value; // y 轴值
+            return `${yAxisValue}%`;
+          }
         },
       }
     ]
   };
 
-  myChart.value.setOption(option)
+  myChart.value?.setOption(option)
 
-  window.addEventListener("resize", function() {
-    myChart.value?.resize();
-  });
-})
+}, {deep: true})
+
 
 const goBack = () => {
   router.back()

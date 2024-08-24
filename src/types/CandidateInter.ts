@@ -7,8 +7,12 @@ export interface CandidateInter {
 export interface CandidateRecordInter {
   id: number,
   candidateId: number,
+  candidateName: string,
   userRecord: Array<OneRecordInter>,
   candidateRecord: Array<OneRecordInter>,
+  dateXAxisData: Array<string>,
+  userYAxisData: Array<number>,
+  candidateYAxisData: Array<number>,
 }
 
 export interface OneRecordInter {
