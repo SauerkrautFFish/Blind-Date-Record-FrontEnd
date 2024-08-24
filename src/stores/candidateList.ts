@@ -3,7 +3,7 @@ import { bdRequest } from '@/config/bdRequest'
 import { ElMessage } from 'element-plus'
 import { useBdTokenStore } from '@/stores/bdToken'
 import { useRegisterAndLoginStore } from '@/stores/RegisterAndLogin'
-import type { CandidateInter, CandidateRecordInter } from '@/types/CandidateInter'
+import type { CandidateInter, CandidateRecordInter, OneRecordInter } from '@/types/CandidateInter'
 import { useUtilsStore } from '@/stores/commonUtils'
 
 export const useCandidateStore = defineStore('candidate', {
@@ -41,17 +41,6 @@ export const useCandidateStore = defineStore('candidate', {
     getCandidateRecordByCandidateId(candidateId:any) {
       return this.candidateRecords[candidateId] || {}
     },
-
-    // getCandidateNameById(id:any):string {
-    //   console.log(this.candidateList.length)
-    //   for(let i = 0; i < this.candidateList.length; i++) {
-    //     if(this.candidateList[i].id == id) {
-    //       return this.candidateList[i].name
-    //     }
-    //   }
-    //
-    //   return ""
-    // },
 
     async getCandidatesApi() {
       const bdTokenStore = useBdTokenStore()
@@ -191,8 +180,6 @@ export const useCandidateStore = defineStore('candidate', {
       const userRecordDate = new Date(userRecord.date)
       userRecord.date = utils.getFormatTime(userRecordDate)
 
-      // TODO 判断日期参数等
-
       const record = this.getCandidateRecordByCandidateId(candidateId)
       if(userRecord.recordIndex == -1)
         record.userRecord.push({date: userRecord.date, totalCnt: userRecord.totalCnt,
@@ -235,7 +222,6 @@ export const useCandidateStore = defineStore('candidate', {
             duration: 1400,
           })
           this.setAddCandidateRecordDialog(false)
-          this.getCandidateRecordApi(candidateId)
         } else {
           ElMessage({
             message: response.data.message,
@@ -243,6 +229,7 @@ export const useCandidateStore = defineStore('candidate', {
             duration: 1400,
           })
         }
+        this.getCandidateRecordApi(candidateId)
       }).catch((error) => {
         ElMessage({
           message: '服务器开小差~',
