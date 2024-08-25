@@ -2,6 +2,29 @@
 
 This template should help get you started developing with Vue 3 in Vite.
 
+
+
+docker build -t my-vue-app123 .
+
+docker login -u {username}
+
+docker tag my-vue-app123 knighthong/my-vue-app123:latest
+
+docker push knighthong/my-vue-app123:latest
+
+https://dockerproxy.cn/
+
+docker pull dockerproxy.cn/knighthong/my-vue-app123:latest
+
+docker run -d -p 80:80 {image}
+
+docker配置文件：/etc/docker/daemon.json
+
+修改完后：
+sudo systemctl daemon-reload
+
+sudo systemctl restart docker
+
 ## Recommended IDE Setup
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
