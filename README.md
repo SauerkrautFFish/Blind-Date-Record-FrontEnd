@@ -3,6 +3,7 @@
 This template should help get you started developing with Vue 3 in Vite.
 
 
+npm run build:prod
 
 docker build -t my-vue-app123 .
 
@@ -16,7 +17,7 @@ https://dockerproxy.cn/
 
 docker pull dockerproxy.cn/knighthong/my-vue-app123:latest
 
-docker run -d -p 80:80 {image}
+docker run -d -p 80:80 --network my_network {image}
 
 docker配置文件：/etc/docker/daemon.json
 

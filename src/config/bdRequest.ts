@@ -1,10 +1,13 @@
 import axios from 'axios';
 
+const baseUrl = import.meta.env.VITE_DOMAIN_URL
 export const bdRequest = axios.create({
-  baseURL: 'http://localhost:8080', // 替换为你的API基础URL
+  baseURL: baseUrl, // 替换为你的API基础URL
   timeout: 10000, // 请求超时时间，单位：毫秒
 
 });
+
+console.log("baseUrl = ", baseUrl)
 
 //
 // // 使用GET方法发送请求
