@@ -37,8 +37,18 @@
         </el-table-column>
       </el-table>
     </el-tab-pane>
-    <el-tab-pane label="排行榜" name="rankTab">Config</el-tab-pane>
-    <el-tab-pane label="情感分析" name="analysisTab">Role</el-tab-pane>
+    <el-tab-pane label="排行榜" name="rankTab">
+      <el-scrollbar height="100%">
+        <p v-for="(item, index) in youFocusOnCandidateList" :key="item" class="scrollbar-demo-item">{{ index }}, {{ item }}</p>
+      </el-scrollbar>
+
+
+    </el-tab-pane>
+    <el-tab-pane label="情感分析" name="analysisTab">
+      展示所有候选人 然后有两个按钮 一个生成报告 一个查看 当点击生成报告后 跳转页面 该页面和查看页面一样
+      正在生成中的话 就不能点击生成报告 没有生成报告的时候不能点击查看
+
+    </el-tab-pane>
   </el-tabs>
   <router-view/>
 </template>
@@ -47,8 +57,11 @@
 import { useCandidateStore } from '@/stores/candidateList'
 import { computed, onMounted, reactive, ref } from 'vue'
 import router from '@/router'
+import { useRankListStore } from '@/stores/rankList'
 
 const candidateStore = useCandidateStore()
+
+const rankListStore = useRankListStore()
 
 const addCandidateForm = reactive({
   name: '',
@@ -56,6 +69,7 @@ const addCandidateForm = reactive({
 
 onMounted(() => {
   candidateStore.getCandidatesApi()
+  rankListStore.getCandidateRankList(true)
 })
 
 const candidateSearch = ref('')
@@ -76,8 +90,23 @@ const handleEdit = (candidateId:number) => {
 const handleDelete = (candidateId:number) => {
 
 }
+
+const youFocusOnCandidateList = computed(() =>
+  rankListStore.youFocusOnRankList
+)
+
 </script>
 
 <style scoped>
-
+.scrollbar-demo-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  margin: 30px;
+  text-align: center;
+  border-radius: 4px;
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+}
 </style>
