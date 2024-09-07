@@ -30,6 +30,12 @@ const router = createRouter({
       component: () => import("@/views/CandidateRecord.vue"),
       props: true
     },
+    {
+      path: '/myProject/candidateReport/:candidateId',
+      name: 'reportPage',
+      component: () => import("@/views/CandidateReport.vue"),
+      props: true
+    },
   ]
 })
 

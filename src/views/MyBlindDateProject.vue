@@ -47,7 +47,32 @@
     <el-tab-pane label="情感分析" name="analysisTab">
       展示所有候选人 然后有两个按钮 一个生成报告 一个查看 当点击生成报告后 跳转页面 该页面和查看页面一样
       正在生成中的话 就不能点击生成报告 没有生成报告的时候不能点击查看
+      <el-table :data="filterCandidateList" style="width: 100%">
+        <el-table-column label="候选人" prop="name" />
+        <el-table-column label="创建时间" prop="createTime" />
+        <el-table-column align="right">
+          <template #header>
+            <el-input v-model="candidateSearch" size="small" placeholder="search" />
+          </template>
+          <template #default="scope">
+            <el-button type="success" @click="handleOpenReportDialog(scope.row.id)">生成报告</el-button>
+            <el-dialog v-model="candidateReportStore.generateReportDialog" title="生成候选人情感分析报告" width="500">
 
+              <template #footer>
+                <div class="dialog-footer">
+                  <el-button @click="candidateReportStore.generateReportDialog = false">取消</el-button>
+                  <el-button type="primary" :loading="candidateReportStore.projectLoading" @click="candidateReportStore.generateReportApi(generateReportCandidateId)">
+                    {{
+                      candidateReportStore.projectLoading ? '提交中' : '确认'
+                    }}
+                  </el-button>
+                </div>
+              </template>
+            </el-dialog>
+            <el-button type="primary" @click="handleSeeReport(scope.row.id)">查看</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
     </el-tab-pane>
   </el-tabs>
   <router-view/>
@@ -58,10 +83,13 @@ import { useCandidateStore } from '@/stores/candidateList'
 import { computed, onMounted, reactive, ref } from 'vue'
 import router from '@/router'
 import { useRankListStore } from '@/stores/rankList'
+import { useCandidateReportStore } from '@/stores/candidateReport'
 
 const candidateStore = useCandidateStore()
 
 const rankListStore = useRankListStore()
+
+const candidateReportStore = useCandidateReportStore()
 
 const addCandidateForm = reactive({
   name: '',
@@ -91,6 +119,15 @@ const handleDelete = (candidateId:number) => {
 
 }
 
+let generateReportCandidateId = -1
+const handleOpenReportDialog = (candidateId:number) => {
+  generateReportCandidateId = candidateId
+  console.log(generateReportCandidateId)
+  candidateReportStore.generateReportDialog = true
+}
+const handleSeeReport = (candidateId:number) => {
+  router.push(`/myProject/candidateRecord/${candidateId}`)
+}
 const youFocusOnCandidateList = computed(() =>
   rankListStore.youFocusOnRankList
 )
