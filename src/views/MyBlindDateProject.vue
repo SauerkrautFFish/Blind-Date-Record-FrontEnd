@@ -39,7 +39,7 @@
     </el-tab-pane>
     <el-tab-pane label="排行榜" name="rankTab">
       <el-scrollbar height="100%">
-        <p v-for="(item, index) in youFocusOnCandidateList" :key="item" class="scrollbar-demo-item">{{ index }}, {{ item }}</p>
+        <p v-for="(item, index) in youFocusOnCandidateList" :key="item" class="scrollbar-demo-item">{{ index + 1 }}, {{ item }}</p>
       </el-scrollbar>
 
 
@@ -69,8 +69,10 @@
                 </div>
               </template>
             </el-dialog>
+
             <el-button type="primary" @click="handleSeeReport(scope.row.id)">查看</el-button>
           </template>
+
         </el-table-column>
       </el-table>
     </el-tab-pane>
@@ -126,7 +128,7 @@ const handleOpenReportDialog = (candidateId:number) => {
   candidateReportStore.generateReportDialog = true
 }
 const handleSeeReport = (candidateId:number) => {
-  router.push(`/myProject/candidateRecord/${candidateId}`)
+  router.push(`/myProject/candidateReport/${candidateId}`)
 }
 const youFocusOnCandidateList = computed(() =>
   rankListStore.youFocusOnRankList
