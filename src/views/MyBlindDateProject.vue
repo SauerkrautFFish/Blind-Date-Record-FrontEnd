@@ -45,8 +45,7 @@
 
     </el-tab-pane>
     <el-tab-pane label="情感分析" name="analysisTab">
-      展示所有候选人 然后有两个按钮 一个生成报告 一个查看 当点击生成报告后 跳转页面 该页面和查看页面一样
-      正在生成中的话 就不能点击生成报告 没有生成报告的时候不能点击查看
+
       <el-table :data="filterCandidateList" style="width: 100%">
         <el-table-column label="候选人" prop="name" />
         <el-table-column label="创建时间" prop="createTime" />
