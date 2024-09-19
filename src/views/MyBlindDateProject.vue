@@ -114,10 +114,10 @@ const handleEnter = (candidateId:number) => {
   router.push(`/myProject/candidateRecord/${candidateId}`)
 }
 const handleEdit = (candidateId:number) => {
-
+  // 填充输入框 点击确定提交
 }
 const handleDelete = (candidateId:number) => {
-
+  // 弹出提示 说不可恢复 点击确认继续
 }
 
 let generateReportCandidateId = -1
