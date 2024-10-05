@@ -13,7 +13,8 @@ export const useCandidateStore = defineStore('candidate', {
     addCandidateDialog: false, // 添加候选人dialog
     candidateList: [] as CandidateInter[], // 候选人列表
     candidateRecords: {} as {[key:number] : CandidateRecordInter},
-    addCandidateRecordDialog: false, // 添加候选人dialog
+    addCandidateRecordDialog: false, // 添加候选人记录dialog
+    deleteCandidateDialog: false, // 删除候选人dialog
   }),
 
   actions: {
@@ -28,6 +29,10 @@ export const useCandidateStore = defineStore('candidate', {
 
     setAddCandidateRecordDialog(flag:boolean) {
       this.addCandidateRecordDialog = flag
+    },
+
+    setDeleteCandidateDialog(flag:boolean) {
+      this.deleteCandidateDialog = flag
     },
 
     setCandidateList(candidateList:any) {
@@ -111,7 +116,46 @@ export const useCandidateStore = defineStore('candidate', {
           type: 'error',
           duration: 1400,
         })
-        console.log("注册失败error: ", error)
+
+      });
+
+      this.setProjectLoading(false)
+    },
+
+
+    async deleteCandidateApi(candidateId:any) {
+      this.setProjectLoading(true)
+
+      const bdTokenStore = useBdTokenStore()
+      await bdRequest.delete('/api/removeCandidate?candidateId=' + candidateId, {
+          headers : {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "bd-token": bdTokenStore.token
+          }
+        }
+      ).then((response) => {
+        if(response.data.code == 0) {
+          ElMessage({
+            message: '删除成功',
+            type: 'success',
+            duration: 1400,
+          })
+          this.setDeleteCandidateDialog(false)
+          this.getCandidatesApi()
+        } else {
+          ElMessage({
+            message: response.data.message,
+            type: 'warning',
+            duration: 1400,
+          })
+        }
+      }).catch((error) => {
+        ElMessage({
+          message: '服务器开小差~',
+          type: 'error',
+          duration: 1400,
+        })
+
       });
 
       this.setProjectLoading(false)

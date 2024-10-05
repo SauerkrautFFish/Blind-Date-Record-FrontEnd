@@ -32,10 +32,29 @@
           <template #default="scope">
             <el-button type="primary" @click="handleEnter(scope.row.id)">进入</el-button>
             <el-button @click="handleEdit(scope.row.id)">编辑</el-button>
-            <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+            <el-button type="danger" @click="handlePreDelete(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
+
+      <el-dialog
+        v-model="candidateStore.deleteCandidateDialog"
+        title="Warning"
+        width="500"
+        align-center
+      >
+        <span>删除后不可恢复, 确认要继续吗?</span>
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button @click="candidateStore.setDeleteCandidateDialog(false)">取消</el-button>
+            <el-button type="danger" @click="handleDelete()">
+              确认
+            </el-button>
+          </div>
+        </template>
+      </el-dialog>
+
+
     </el-tab-pane>
     <el-tab-pane label="排行榜" name="rankTab">
       <el-scrollbar height="100%">
@@ -116,8 +135,17 @@ const handleEnter = (candidateId:number) => {
 const handleEdit = (candidateId:number) => {
   // 填充输入框 点击确定提交
 }
-const handleDelete = (candidateId:number) => {
+
+let deleteCandidateId = -1
+const handlePreDelete = (candidateId:number) => {
   // 弹出提示 说不可恢复 点击确认继续
+  deleteCandidateId = candidateId
+  candidateStore.setDeleteCandidateDialog(true)
+}
+
+const handleDelete = () => {
+  // 弹出提示 说不可恢复 点击确认继续
+  candidateStore.deleteCandidateApi(deleteCandidateId)
 }
 
 let generateReportCandidateId = -1
