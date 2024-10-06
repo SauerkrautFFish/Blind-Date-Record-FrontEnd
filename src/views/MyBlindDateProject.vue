@@ -1,6 +1,6 @@
 <template>
 
-  <el-tabs type="card" v-model="defaultTab">
+  <el-tabs type="card" v-model="defaultTab" @tab-click="handleTabClick">
     <el-tab-pane label="候选人列表" name="candidateTab">
       <el-button type="primary" round @click="candidateStore.addCandidateDialog = true">添 加</el-button>
       <el-divider />
@@ -31,7 +31,7 @@
           </template>
           <template #default="scope">
             <el-button type="primary" @click="handleEnter(scope.row.id)">进入</el-button>
-            <el-button @click="handleEdit(scope.row.id)">编辑</el-button>
+            <el-button @click="handlePreEdit(scope.row.id, scope.row.name)">编辑</el-button>
             <el-button type="danger" @click="handlePreDelete(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
@@ -54,6 +54,23 @@
         </template>
       </el-dialog>
 
+      <el-dialog v-model="candidateStore.modifyCandidateDialog" title="编辑候选人" width="500">
+        <el-form :model="modifyCandidateForm">
+          <el-form-item label="名 字">
+            <el-input v-model="modifyCandidateForm.name" autocomplete="off" />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button @click="candidateStore.setModifyCandidateDialog(false)">取消</el-button>
+            <el-button type="primary" :loading="candidateStore.projectLoading" @click="candidateStore.modifyCandidateApi(modifyCandidateForm)">
+              {{
+                candidateStore.projectLoading ? '提交中' : '确认'
+              }}
+            </el-button>
+          </div>
+        </template>
+      </el-dialog>
 
     </el-tab-pane>
     <el-tab-pane label="排行榜" name="rankTab">
@@ -115,6 +132,11 @@ const addCandidateForm = reactive({
   name: '',
 })
 
+const modifyCandidateForm = reactive({
+  id: -1,
+  name: ''
+})
+
 onMounted(() => {
   candidateStore.getCandidatesApi()
   rankListStore.getCandidateRankList(true)
@@ -132,8 +154,11 @@ const filterCandidateList = computed(() =>
 const handleEnter = (candidateId:number) => {
   router.push(`/myProject/candidateRecord/${candidateId}`)
 }
-const handleEdit = (candidateId:number) => {
+const handlePreEdit = (candidateId:number, name:string) => {
   // 填充输入框 点击确定提交
+  modifyCandidateForm.id = candidateId
+  modifyCandidateForm.name = name
+  candidateStore.setModifyCandidateDialog(true)
 }
 
 let deleteCandidateId = -1
@@ -160,6 +185,23 @@ const handleSeeReport = (candidateId:number) => {
 const youFocusOnCandidateList = computed(() =>
   rankListStore.youFocusOnRankList
 )
+
+const handleTabClick = (tab:any) => {
+  console.log("click")
+  console.log(tab.paneName)
+  switch (tab.paneName) {
+    case 'candidateTab':
+      candidateStore.getCandidatesApi();
+      break;
+    case 'rankTab':
+      rankListStore.getCandidateRankList(true);
+      break;
+    case 'analysisTab':
+      break;
+    default:
+      break;
+  }
+}
 
 </script>
 

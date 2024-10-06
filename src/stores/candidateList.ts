@@ -15,6 +15,7 @@ export const useCandidateStore = defineStore('candidate', {
     candidateRecords: {} as {[key:number] : CandidateRecordInter},
     addCandidateRecordDialog: false, // 添加候选人记录dialog
     deleteCandidateDialog: false, // 删除候选人dialog
+    modifyCandidateDialog: false, // 修改候选人dialog
   }),
 
   actions: {
@@ -33,6 +34,10 @@ export const useCandidateStore = defineStore('candidate', {
 
     setDeleteCandidateDialog(flag:boolean) {
       this.deleteCandidateDialog = flag
+    },
+
+    setModifyCandidateDialog(flag:boolean) {
+      this.modifyCandidateDialog = flag
     },
 
     setCandidateList(candidateList:any) {
@@ -141,6 +146,47 @@ export const useCandidateStore = defineStore('candidate', {
             duration: 1400,
           })
           this.setDeleteCandidateDialog(false)
+          this.getCandidatesApi()
+        } else {
+          ElMessage({
+            message: response.data.message,
+            type: 'warning',
+            duration: 1400,
+          })
+        }
+      }).catch((error) => {
+        ElMessage({
+          message: '服务器开小差~',
+          type: 'error',
+          duration: 1400,
+        })
+
+      });
+
+      this.setProjectLoading(false)
+    },
+
+    async modifyCandidateApi(modifyCandidateForm:any) {
+      this.setProjectLoading(true)
+
+      const bdTokenStore = useBdTokenStore()
+      await bdRequest.post('/api/modifyCandidate', {
+          candidateId: modifyCandidateForm.id,
+          candidateName: modifyCandidateForm.name
+        }, {
+          headers : {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "bd-token": bdTokenStore.token
+          }
+        }
+      ).then((response) => {
+        if(response.data.code == 0) {
+          ElMessage({
+            message: '修改成功',
+            type: 'success',
+            duration: 1400,
+          })
+          this.setModifyCandidateDialog(false)
           this.getCandidatesApi()
         } else {
           ElMessage({
