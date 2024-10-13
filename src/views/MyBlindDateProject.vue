@@ -73,7 +73,7 @@
       </el-dialog>
 
     </el-tab-pane>
-    <el-tab-pane label="排行榜" name="rankTab">
+    <el-tab-pane label="心动排行榜" name="rankTab">
       <el-scrollbar height="100%">
         <p v-for="(item, index) in youFocusOnCandidateList" :key="item" class="scrollbar-demo-item">{{ index + 1 }}, {{ item }}</p>
       </el-scrollbar>
