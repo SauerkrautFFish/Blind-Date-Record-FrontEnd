@@ -99,9 +99,16 @@ export const useCandidateReportStore = defineStore('candidateReport', {
         }
       ).then((response) => {
         if(response.data.code == 0) {
-          console.log(response.data.data)
           this.setCandidateReport(response.data.data)
+          if (response.data.data.status == 1) {
+            ElMessage({
+              message: "报告不存在！",
+              type: 'warning',
+              duration: 1400,
+            })
+          }
         } else {
+
           ElMessage({
             message: response.data.message,
             type: 'warning',

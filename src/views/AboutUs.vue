@@ -3,7 +3,7 @@
 </script>
 
 <template>
-about
+about 待解锁
 </template>
 
 <style scoped>
