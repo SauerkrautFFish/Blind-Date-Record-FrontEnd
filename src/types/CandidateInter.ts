@@ -1,6 +1,7 @@
 export interface CandidateInter {
   id: number,
-  name: string
+  name: string,
+  status: number,
   createTime:Date
 }
 

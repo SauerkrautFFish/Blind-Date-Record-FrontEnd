@@ -172,7 +172,8 @@ export const useCandidateStore = defineStore('candidate', {
       const bdTokenStore = useBdTokenStore()
       await bdRequest.post('/api/modifyCandidate', {
           candidateId: modifyCandidateForm.id,
-          candidateName: modifyCandidateForm.name
+          candidateName: modifyCandidateForm.name,
+          status: modifyCandidateForm.status
         }, {
           headers : {
             "Content-Type": "application/x-www-form-urlencoded",

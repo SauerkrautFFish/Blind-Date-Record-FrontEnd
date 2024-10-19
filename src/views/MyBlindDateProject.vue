@@ -25,13 +25,30 @@
       <el-table :data="filterCandidateList" style="width: 100%">
         <el-table-column label="候选人" prop="name" />
         <el-table-column label="创建时间" prop="createTime" />
+        <el-table-column label="公开/隐藏" prop="status">
+
+          <template #default="scope">
+            <el-switch
+              v-model="scope.row.status"
+              inline-prompt
+              active-text="公开"
+              inactive-text="隐藏"
+              :active-value="1"
+              :inactive-value="0"
+              @change="handleCandidateStatusSwitchChange(scope.row, $event)"
+            />
+
+          </template>
+        </el-table-column>
+
         <el-table-column align="right">
           <template #header>
             <el-input v-model="candidateSearch" size="small" placeholder="search" />
           </template>
           <template #default="scope">
+
             <el-button type="primary" @click="handleEnter(scope.row.id)">进入</el-button>
-            <el-button @click="handlePreEdit(scope.row.id, scope.row.name)">编辑</el-button>
+            <el-button @click="handlePreEdit(scope.row)">编辑</el-button>
             <el-button type="danger" @click="handlePreDelete(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
@@ -121,7 +138,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import router from '@/router'
 import { useRankListStore } from '@/stores/rankList'
 import { useCandidateReportStore } from '@/stores/candidateReport'
-
+import { Hide, View } from '@element-plus/icons-vue'
 const candidateStore = useCandidateStore()
 
 const rankListStore = useRankListStore()
@@ -134,8 +151,11 @@ const addCandidateForm = reactive({
 
 const modifyCandidateForm = reactive({
   id: -1,
-  name: ''
+  name: '',
+  status: 0
 })
+
+const publicCandidate = ref(true)
 
 onMounted(() => {
   candidateStore.getCandidatesApi()
@@ -154,10 +174,11 @@ const filterCandidateList = computed(() =>
 const handleEnter = (candidateId:number) => {
   router.push(`/myProject/candidateRecord/${candidateId}`)
 }
-const handlePreEdit = (candidateId:number, name:string) => {
+const handlePreEdit = (candidate:any) => {
   // 填充输入框 点击确定提交
-  modifyCandidateForm.id = candidateId
-  modifyCandidateForm.name = name
+  modifyCandidateForm.id = candidate.id
+  modifyCandidateForm.name = candidate.name
+  modifyCandidateForm.status = candidate.status
   candidateStore.setModifyCandidateDialog(true)
 }
 
@@ -185,6 +206,15 @@ const handleSeeReport = (candidateId:number) => {
 const youFocusOnCandidateList = computed(() =>
   rankListStore.youFocusOnRankList
 )
+
+const handleCandidateStatusSwitchChange = (candidate:any, newValue:any) => {
+  console.log(candidate, newValue)
+  // 更新候选人公开状态
+  modifyCandidateForm.id = candidate.id
+  modifyCandidateForm.name = candidate.name
+  modifyCandidateForm.status = newValue
+  candidateStore.modifyCandidateApi(modifyCandidateForm)
+}
 
 const handleTabClick = (tab:any) => {
   console.log("click")
