@@ -10,7 +10,7 @@ import type { ShareMomentInter } from '@/types/ShareMomentInter'
 export const useShareMomentStore = defineStore('shareMoment', {
 
   state: () => ({
-    shareMomentList: {} as ShareMomentInter
+    shareMomentList: [] as ShareMomentInter[]
   }),
 
   actions: {
@@ -48,11 +48,7 @@ export const useShareMomentStore = defineStore('shareMoment', {
         }
       ).then((response) => {
         if(response.data.code == 0) {
-          ElMessage({
-            message: '请求成功',
-            type: 'success',
-            duration: 1400,
-          })
+          this.setShareMomentList(response.data.data)
         } else {
           ElMessage({
             message: response.data.message,
@@ -60,8 +56,6 @@ export const useShareMomentStore = defineStore('shareMoment', {
             duration: 1400,
           })
         }
-        this.setShareMomentList(response.data.data)
-        console.log(this.getShareMomentList())
       }).catch((error) => {
         if(error.response.status == 401) {
           const rlStore = useRegisterAndLoginStore()

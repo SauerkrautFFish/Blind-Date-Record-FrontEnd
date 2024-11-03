@@ -4,11 +4,14 @@
   <div style="display: flex;
       flex-wrap: wrap;
       gap: 16px;">
-    <el-card style="width: 300px" shadow="hover">
-      <p v-for="o in 4" :key="o" class="text item">{{ 'List item ' + o }}</p>
-      <template #footer>点击查看</template>
-    </el-card>
+    <p v-for="o in shareMomentStore.getShareMomentList()" :key="o.candidateId" class="text item">
+      <el-card style="width: 300px" shadow="hover">
 
+          {{ o.userName + "->" + o.candidateName + "的记录" }}
+
+        <template #footer>点击查看</template>
+      </el-card>
+    </p>
   </div>
 </template>
 
