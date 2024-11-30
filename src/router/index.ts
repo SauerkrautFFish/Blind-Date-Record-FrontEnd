@@ -36,6 +36,12 @@ const router = createRouter({
       component: () => import("@/views/CandidateReport.vue"),
       props: true
     },
+    {
+      path: '/shareMoments/detail/:shareUserId/:shareUserName/:shareCandidateId',
+      name: 'reportPage',
+      component: () => import("@/views/MomentDetailPage.vue"),
+      props: true
+    },
   ]
 })
 

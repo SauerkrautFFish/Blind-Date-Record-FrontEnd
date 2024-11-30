@@ -7,20 +7,25 @@
     <p v-for="o in shareMomentStore.getShareMomentList()" :key="o.candidateId" class="text item">
       <el-card style="width: 300px" shadow="hover">
 
-          {{ o.userName + "->" + o.candidateName + "的记录" }}
+          {{ o.userName + "与" + o.candidateName + "的记录" }}
 
-        <template #footer>点击查看</template>
+        <template #footer>
+
+          <div>
+            <el-link :underline="false" @click="handlerEnterMomentDetailPage(o.userId, o.userName, o.candidateId)">点击查看</el-link>
+          </div>
+
+        </template>
       </el-card>
     </p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useCandidateStore } from '@/stores/candidateList'
-import { useRankListStore } from '@/stores/rankList'
-import { useCandidateReportStore } from '@/stores/candidateReport'
-import { onMounted, reactive, ref } from 'vue'
+
+import { onMounted } from 'vue'
 import { useShareMomentStore } from '@/stores/shareMoment'
+import router from '@/router'
 
 const shareMomentStore = useShareMomentStore()
 
@@ -28,6 +33,12 @@ const shareMomentStore = useShareMomentStore()
 onMounted(() => {
   shareMomentStore.getShareMomentListApi()
 })
+
+const handlerEnterMomentDetailPage = (shareUserId:number, shareUserName:any, shareCandidateId:number) => {
+  router.push(`/shareMoments/detail/${shareUserId}/${shareUserName}/${shareCandidateId}`)
+  return
+}
+
 </script>
 
 <style scoped>

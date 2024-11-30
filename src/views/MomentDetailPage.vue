@@ -1,107 +1,37 @@
 <template>
   <el-page-header @back="goBack" :icon="ArrowLeft">
-    <template #content>
-      <span class="text-large font-600 mr-3"> {{ candidateName }} </span>
-    </template>
-  </el-page-header>
-  <el-divider />
-  <div id="main-chart" style="width: 100%; height: 500px"></div>
-  <el-dialog v-model="candidateStore.addCandidateRecordDialog" @close="resetCandidateRecordForm" title="添加记录"
-             width="500">
-    <el-form :model="addCandidateRecordForm">
-      <el-form-item label="日 期">
-        <el-date-picker
-          v-model="addCandidateRecordForm.date"
-          type="date"
-          placeholder="选择日期"
-          size="large"
-        />
-      </el-form-item>
-      <el-form-item label="尝试约会次数">
-        <el-input-number
-          v-model="addCandidateRecordForm.totalCnt"
-          :min="1"
-          controls-position="right"
-          size="large"
-        />
-      </el-form-item>
-      <el-form-item label="成功次数">
-        <el-input-number
-          v-model="addCandidateRecordForm.successCnt"
-          :min="0"
-          :max="addCandidateRecordForm.totalCnt"
-          controls-position="right"
-          size="large"
-        />
-      </el-form-item>
-      <el-form-item label="说 明">
-        <el-input
-          v-model="addCandidateRecordForm.explanation"
-          maxlength="200"
 
-          placeholder="请输入"
-          show-word-limit
-          type="textarea"
-        />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="resetCandidateRecordForm">取消</el-button>
-        <el-button type="primary" :loading="candidateStore.projectLoading"
-                   @click="candidateStore.setRecord(addCandidateRecordForm, candidateId)">
-          {{
-            candidateStore.projectLoading ? '提交中' : '确认'
-          }}
-        </el-button>
-      </div>
-    </template>
-  </el-dialog>
+  </el-page-header>
+
+  <el-divider />
+  <div>
+
+    报告生成日期：{{ shareMomentStore.getShareDetail().candidateReportVO?.updateTime }}
+    <el-divider />
+    {{ shareMomentStore.getShareDetail().candidateReportVO?.report }}
+    <el-divider />
+
+  </div>
+  <div id="main-chart" style="width: 100%; height: 500px"></div>
   <div style="width: 45%; height: auto; background-color: red; position:absolute;">
-    <el-button class="mt-4" type="primary" style="width: 100%" @click="identifyUserAndCandidate(true)">添加自己的记录
-    </el-button>
-    <el-table :data="candidateStore.getCandidateRecordByCandidateId(candidateId).userRecord" style="width: 100%">
+
+    <el-table :data="shareMomentStore.getShareDetail().blindDateRecordVO?.userRecord" style="width: 100%">
       <el-table-column fixed prop="date" sortable label="日 期" />
       <el-table-column prop="totalCnt" label="尝试约会次数" />
       <el-table-column prop="successCnt" label="成功次数" />
       <el-table-column prop="explanation" label="说 明" />
-      <el-table-column fixed="right" label="操 作">
-        <template #default="scope">
-          <el-button link type="primary" size="small" @click="modifyCandidateRecord(scope, true)">
-            修改
-          </el-button>
-          <el-button link type="danger" size="small"
-                     @click="candidateStore.deleteOneRecord(candidateId, scope.$index, true)">
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
     </el-table>
 
   </div>
   <div style="width: 45%; height: auto; background-color: blue; margin-left:50%;">
-    <el-button class="mt-4" type="primary" style="width: 100%" @click="identifyUserAndCandidate(false)">
-      添加相亲对象的记录
-    </el-button>
-    <el-table :data="candidateStore.getCandidateRecordByCandidateId(candidateId).candidateRecord" style="width: 100%">
+
+    <el-table :data="shareMomentStore.getShareDetail().blindDateRecordVO?.candidateRecord" style="width: 100%">
       <el-table-column fixed prop="date" sortable label="日 期" />
       <el-table-column prop="totalCnt" label="尝试约会次数" />
       <el-table-column prop="successCnt" label="成功次数" />
       <el-table-column prop="explanation" label="说 明" />
-      <el-table-column fixed="right" label="操 作">
-        <template #default="scope">
-          <el-button link type="primary" size="small" @click="modifyCandidateRecord(scope, false)">
-            修改
-          </el-button>
-          <el-button link type="danger" size="small"
-                     @click="candidateStore.deleteOneRecord(candidateId, scope.$index, false)">
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
     </el-table>
   </div>
-
 
 </template>
 
@@ -112,64 +42,29 @@ import { useCandidateStore } from '@/stores/candidateList'
 import router from '@/router'
 import * as echarts from 'echarts'
 import { storeToRefs } from 'pinia'
+import { useShareMomentStore } from '@/stores/shareMoment'
 
-const addCandidateRecordForm = reactive({
-  recordIndex: -1,
-  date: '',
-  totalCnt: 0,
-  successCnt: 0,
-  explanation: '',
-  // 判断下是否是用户记录
-  isUserRecord: false
-})
 
-const { candidateId } = defineProps(['candidateId'])
-const candidateStore = useCandidateStore()
-const { candidateRecords } = storeToRefs(candidateStore)
-const candidateName = ref('')
+const { shareUserId, shareUserName, shareCandidateId } = defineProps(['shareUserId', 'shareUserName', 'shareCandidateId'])
 
-function modifyCandidateRecord(scope: any, isUserRecord: any) {
-  addCandidateRecordForm.recordIndex = scope.$index
-  addCandidateRecordForm.date = scope.row.date
-  addCandidateRecordForm.totalCnt = scope.row.totalCnt
-  addCandidateRecordForm.successCnt = scope.row.successCnt
-  addCandidateRecordForm.explanation = scope.row.explanation
-  identifyUserAndCandidate(isUserRecord)
-}
-
-function identifyUserAndCandidate(isUserRecord: any) {
-  addCandidateRecordForm.isUserRecord = isUserRecord
-  candidateStore.setAddCandidateRecordDialog(true)
-}
-
-function resetCandidateRecordForm() {
-  candidateStore.setAddCandidateRecordDialog(false)
-  addCandidateRecordForm.recordIndex = -1
-  addCandidateRecordForm.date = ''
-  addCandidateRecordForm.totalCnt = 0
-  addCandidateRecordForm.successCnt = 0
-  addCandidateRecordForm.explanation = ''
-}
-
+const shareMomentStore = useShareMomentStore()
+const shareMomentRef = storeToRefs(shareMomentStore)
 let myChart = ref<echarts.ECharts | null>()
 
 onMounted(() => {
-  candidateStore.getCandidateRecordApi(candidateId)
+  shareMomentStore.getShareMomentDetailApi(shareUserId, shareCandidateId)
   // markRaw避免了很多vue3响应式导致echart图表奇怪的问题 牛 虽然不知道原理
   myChart.value = markRaw(echarts.init(document.getElementById('main-chart')))
   window.addEventListener('resize', () => {
     myChart.value?.resize()
   })
 
-
 })
 
 
-watch(() => candidateRecords, (oldVal, newVal) => {
-  const data = candidateRecords.value[candidateId]
-
-  candidateName.value = data.candidateName
-
+watch(() => shareMomentRef, (oldVal, newVal) => {
+  const data = shareMomentStore.getShareDetail().blindDateRecordVO
+  const shareCandidateName = data.candidateName
   const dateXAxisData = data.dateXAxisData
   const userYAxisData = data.userYAxisData
   const candidateYAxisData = data.candidateYAxisData
@@ -237,7 +132,7 @@ watch(() => candidateRecords, (oldVal, newVal) => {
     },
     series: [
       {
-        name: '你',
+        name: shareUserName,
         type: 'line',
         // true 可以让我们的折线显示带有弧度
         smooth: true,
@@ -255,7 +150,7 @@ watch(() => candidateRecords, (oldVal, newVal) => {
         }
       },
       {
-        name: candidateName.value,
+        name: shareCandidateName,
         type: 'line',
         smooth: true,
         data: candidateYAxisData,

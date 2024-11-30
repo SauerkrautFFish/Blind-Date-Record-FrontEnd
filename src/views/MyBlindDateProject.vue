@@ -173,6 +173,7 @@ const filterCandidateList = computed(() =>
 )
 const handleEnter = (candidateId:number) => {
   router.push(`/myProject/candidateRecord/${candidateId}`)
+  return
 }
 const handlePreEdit = (candidate:any) => {
   // 填充输入框 点击确定提交
