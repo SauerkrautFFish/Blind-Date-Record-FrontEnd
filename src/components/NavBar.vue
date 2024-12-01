@@ -6,13 +6,13 @@
     :ellipsis="false"
     @select="handleNavSelect"
   >
-    <el-menu-item index="0">
-      <img
-        style="width: 100px"
-        src="https://element-plus.org/images/element-plus-logo.svg"
-        alt="Element logo"
-      />
-    </el-menu-item>
+<!--    <el-menu-item index="0">-->
+<!--&lt;!&ndash;      <img&ndash;&gt;-->
+<!--&lt;!&ndash;        style="width: 100px"&ndash;&gt;-->
+<!--&lt;!&ndash;        src="https://element-plus.org/images/element-plus-logo.svg"&ndash;&gt;-->
+<!--&lt;!&ndash;        alt="Element logo"&ndash;&gt;-->
+<!--&lt;!&ndash;      />&ndash;&gt;-->
+<!--    </el-menu-item>-->
 
     <el-menu-item index="/">
       介 绍

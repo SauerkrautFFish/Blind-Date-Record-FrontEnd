@@ -3,7 +3,7 @@
 </script>
 
 <template>
-about 待解锁
+一个也在相亲的人罢了~
 </template>
 
 <style scoped>
