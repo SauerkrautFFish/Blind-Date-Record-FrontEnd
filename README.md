@@ -1,49 +1,39 @@
 # Blind-Date-Record-FrontEnd
 
-This template should help get you started developing with Vue 3 in Vite.
-
-
+## 构建项目
 npm run build:prod
 
+## 上传到自己的docker hub中
 docker build -t my-vue-app123 .
 
 docker login -u {username}
 
-docker tag my-vue-app123 knighthong/my-vue-app123:latest
+docker tag my-vue-app123 {username}/my-vue-app123:latest
 
-docker push knighthong/my-vue-app123:latest
+docker push {username}/my-vue-app123:latest
 
-https://dockerproxy.cn/
+## 拉取镜像到本地
 
-docker pull dockerpull.org/knighthong/my-vue-app123:latest
+docker pull {username}/my-vue-app123:latest
+(国内拉取的话, 可以在{username}前加dockerpull.org等进行拉取, 但因为经常变, dockerpull.org不一定有效)
 
-docker run -d -p 80:80 --network my_network {image}
+## 创建自定义网络(比如后端要和数据库通信 就需要)
+docker network create my_network // 创建自定义网络，因为容器如果重启ip会变，最好的方式是通过域名访问，但是默认网络docker0不支持域名访问，所以需要创建个自定义网络
 
+## 运行
+docker run -d -p 80:80 --network my_network {image_id}
+
+
+## 如果修改了docker配置文件
 docker配置文件：/etc/docker/daemon.json
 
-修改完后：
+修改完后
+
 sudo systemctl daemon-reload
 
 sudo systemctl restart docker
 
-## Recommended IDE Setup
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
-
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
-
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
 
 ## Project Setup
 
@@ -60,12 +50,6 @@ npm run dev
 ### Type-Check, Compile and Minify for Production
 
 ```sh
-npm run build
+npm run build:prod
 ```
 
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
-"# Blind-Date-Record-FrontEnd" 
