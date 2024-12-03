@@ -203,6 +203,7 @@ const handleOpenReportDialog = (candidateId:number) => {
 }
 const handleSeeReport = (candidateId:number) => {
   router.push(`/myProject/candidateReport/${candidateId}`)
+  return
 }
 const youFocusOnCandidateList = computed(() =>
   rankListStore.youFocusOnRankList

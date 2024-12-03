@@ -15,7 +15,7 @@ docker push knighthong/my-vue-app123:latest
 
 https://dockerproxy.cn/
 
-docker pull dockerproxy.cn/knighthong/my-vue-app123:latest
+docker pull dockerpull.org/knighthong/my-vue-app123:latest
 
 docker run -d -p 80:80 --network my_network {image}
 

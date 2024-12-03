@@ -38,7 +38,7 @@ const router = createRouter({
     },
     {
       path: '/shareMoments/detail/:shareUserId/:shareUserName/:shareCandidateId',
-      name: 'reportPage',
+      name: 'sharePage',
       component: () => import("@/views/MomentDetailPage.vue"),
       props: true
     },
